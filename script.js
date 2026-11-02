@@ -498,13 +498,13 @@ document.querySelectorAll('.ab-card').forEach((card, i) => {
   const topics = [
     { re: /\b(hi|hello|hey|yo|good (morning|afternoon|evening))\b/, a: "Hi there! I'm Charly's assistant. Ask me about his skills, education, projects or how to get in touch." },
     { re: /skill|tech|stack|language|code|coding|html|css|javascript|typescript|dart|python|java|php|firebase|figma|tools/, a: 'Charly works with HTML, CSS, JavaScript, TypeScript, Dart, Python, Java, PHP and Firebase, and designs in Figma. UI UX design is a growing focus for him.', link: ['See skills', '#skills'] },
-    { re: /educat|study|school|student|course|degree|learn/, a: "He's a BS Information student, and he keeps learning by practicing HTML, CSS, JavaScript and Dart through personal projects.", link: ['See education', '#education'] },
+    { re: /educat|study|school|student|course|degree|learn/, a: "He's a BS Information Technology student, and he keeps learning by practicing HTML, CSS, JavaScript and Dart through personal projects.", link: ['See education', '#education'] },
     { re: /project|portfolio|built|build|work|made/, a: "His personal website is the main project so far. It has dark and light mode and this chat assistant, and more projects are on the way.", link: ['See projects', '#projects'] },
     { re: /contact|email|mail|phone|call|number|reach|hire|message|touch/, a: 'You can email charlydomingo281@gmail.com, call +63 9631 839 766.', link: ['Go to contact', '#contact'] },
     { re: /where|location|live|from|city|maragusan|davao/, a: 'Charly is based in Maragusan, Davao de Oro, in the Philippines.', link: ['See details', '#about'] },
     { re: /time|clock/, a: () => 'It is ' + new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' }) + ' in Maragusan right now.' },
     { re: /dark|light|theme|color|colour|accent|mode/, a: 'Use the sun and moon switch in the top bar for dark or light mode.' },
-    { re: /who|about|charly|yourself|you do|introduce/, a: 'Charly D. Domingo is a BS Information student who builds websites and designs simple, user-friendly interfaces.', link: ['About Charly', '#about'] },
+    { re: /who|about|charly|yourself|you do|introduce/, a: 'Charly D. Domingo is a BS Information Technology student who builds websites and designs simple, user-friendly interfaces.', link: ['About Charly', '#about'] },
     { re: /thank|thanks|bye|great|cool|nice/, a: "You're welcome! Let me know if you want to know anything else." }
   ];
   const fallback = { a: "I'm not sure about that one. Try asking about skills, education, projects or contact, or reach Charly by email or phone.", link: ['Go to contact', '#contact'] };
