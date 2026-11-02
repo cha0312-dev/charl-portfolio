@@ -499,7 +499,7 @@ document.querySelectorAll('.ab-card').forEach((card, i) => {
     { re: /\b(hi|hello|hey|yo|good (morning|afternoon|evening))\b/, a: "Hi there! I'm Charly's assistant. Ask me about his skills, education, projects or how to get in touch." },
     { re: /skill|tech|stack|language|code|coding|html|css|javascript|typescript|dart|python|java|php|firebase|figma|tools/, a: 'Charly works with HTML, CSS, JavaScript, TypeScript, Dart, Python, Java, PHP and Firebase, and designs in Figma. UI UX design is a growing focus for him.', link: ['See skills', '#skills'] },
     { re: /educat|study|school|student|course|degree|learn/, a: "He's a BS Information Technology student, and he keeps learning by practicing HTML, CSS, JavaScript and Dart through personal projects.", link: ['See education', '#education'] },
-    { re: /project|portfolio|built|build|work|made/, a: "His personal website is the main project so far. It has dark and light mode and this chat assistant, and more projects are on the way.", link: ['See projects', '#projects'] },
+    { re: /project|portfolio|built|build|work|made|app|pawikan|mobile/, a: "His projects include this personal website and Pawikan, an offline mobile app built with Flutter and Dart that helps Filipinos build English sentences from Tagalog or Bisaya, with Pawi the sea turtle as their study buddy.", link: ['See projects', '#projects'] },
     { re: /contact|email|mail|phone|call|number|reach|hire|message|touch/, a: 'You can email charlydomingo281@gmail.com, call +63 9631 839 766.', link: ['Go to contact', '#contact'] },
     { re: /where|location|live|from|city|maragusan|davao/, a: 'Charly is based in Maragusan, Davao de Oro, in the Philippines.', link: ['See details', '#about'] },
     { re: /time|clock/, a: () => 'It is ' + new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' }) + ' in Maragusan right now.' },
@@ -748,3 +748,18 @@ document.querySelectorAll('.ab-card').forEach((card, i) => {
     last = y;
   }, { passive: true });
 })();
+
+/* Project screenshot gallery: arrow buttons switch between screenshots */
+document.querySelectorAll('.gallery').forEach((g) => {
+  const imgs = [...g.querySelectorAll('.gal-stage img')];
+  const count = g.querySelector('.gal-count');
+  const names = ['Sign in', 'Inventory'];
+  let i = 0;
+  function show(n) {
+    i = (n + imgs.length) % imgs.length;
+    imgs.forEach((im, k) => im.classList.toggle('on', k === i));
+    if (count) count.textContent = (i + 1) + ' / ' + imgs.length + (names[i] ? ' \u00b7 ' + names[i] : '');
+  }
+  g.querySelector('.gal-prev').addEventListener('click', () => show(i - 1));
+  g.querySelector('.gal-next').addEventListener('click', () => show(i + 1));
+});
