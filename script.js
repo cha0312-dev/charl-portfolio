@@ -497,7 +497,7 @@ document.querySelectorAll('.ab-card').forEach((card, i) => {
 
   const topics = [
     { re: /\b(hi|hello|hey|yo|good (morning|afternoon|evening))\b/, a: "Hi there! I'm Charly's assistant. Ask me about his skills, education, projects or how to get in touch." },
-    { re: /skill|tech|stack|language|code|coding|html|css|javascript|typescript|dart|python|java|php|firebase|figma|tools/, a: 'Charly works with HTML, CSS, JavaScript, TypeScript, Dart, Python, Java, PHP and Firebase, and designs in Figma. UI UX design is a growing focus for him.', link: ['See skills', '#skills'] },
+    { re: /skill|tech|stack|language|code|coding|html|css|javascript|typescript|dart|flutter|python|java|php|firebase|figma|tools/, a: 'Charly works with HTML, CSS, JavaScript, TypeScript, Dart, Flutter, Python, Java, PHP and Firebase, and designs in Figma. UI UX design is a growing focus for him.', link: ['See skills', '#skills'] },
     { re: /educat|study|school|student|course|degree|learn/, a: "He's a BS Information Technology student, and he keeps learning by practicing HTML, CSS, JavaScript and Dart through personal projects.", link: ['See education', '#education'] },
     { re: /project|portfolio|built|build|work|made|app|pawikan|mobile/, a: "His projects include this personal website and Pawikan, an offline mobile app built with Flutter and Dart that helps Filipinos build English sentences from Tagalog or Bisaya, with Pawi the sea turtle as their study buddy.", link: ['See projects', '#projects'] },
     { re: /contact|email|mail|phone|call|number|reach|hire|message|touch/, a: 'You can email charlydomingo281@gmail.com, call +63 9631 839 766.', link: ['Go to contact', '#contact'] },

@@ -1595,3 +1595,39 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   background: rgba(17, 17, 17, .72); color: #fff; font: 500 .72rem ui-monospace, "SF Mono", Menlo, Consolas, monospace; letter-spacing: .06em; white-space: nowrap;
 }
 .featured:hover .proj-preview.gallery { transform: none; }
+
+/* ---------- Download CV button ---------- */
+.cv-btn {
+  display: inline-flex; align-items: center; gap: .5rem; font: 700 .82rem/1 Inter, system-ui, sans-serif; text-decoration: none;
+  color: var(--bg); background: var(--ink); padding: .85rem 1.3rem; border: 2px solid var(--ink); border-radius: 14px;
+  transition: transform .15s, box-shadow .2s, opacity .2s;
+}
+.cv-btn svg, .nav-cv svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.cv-btn:hover { box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .45); opacity: .92; }
+.cv-btn:hover svg { animation: cvdrop .6s ease; }
+.cv-btn:active { transform: scale(.96); }
+@keyframes cvdrop { 40% { transform: translateY(3px); } }
+.site-header nav a.nav-cv { display: none; }
+@media (max-width: 640px) {
+  .cv-btn { display: none; }
+  .site-header nav a.nav-cv { display: inline-flex; align-items: center; gap: .5rem; }
+}
+@media (prefers-reduced-motion: reduce) { .cv-btn:hover svg { animation: none; } }
+.cv-btn, .hire { white-space: nowrap; flex: none; }
+.site-header nav { min-width: 0; }
+
+/* Download CV: small solid button */
+.cv-btn { padding: .58rem .9rem; gap: .4rem; border-radius: 10px; font: 700 .74rem/1 Inter, system-ui, sans-serif; border-width: 1.5px; }
+.cv-btn svg { width: 13px; height: 13px; stroke-width: 2.4; }
+.cv-btn { padding: .58rem .75rem; }
+.cv-btn { padding: .58rem .9rem; }
+/* Download CV: full size */
+.cv-btn { padding: .85rem 1.4rem; gap: .5rem; border-radius: 14px; font: 700 .82rem/1 Inter, system-ui, sans-serif; border-width: 2px; }
+.cv-btn svg { width: 16px; height: 16px; stroke-width: 2.2; }
+/* Download CV: same outlined style as the old "Hire me" button */
+.cv-btn {
+  color: var(--ink); background: var(--surface); border: 2px solid var(--ink); border-radius: 14px;
+  padding: .85rem 1.5rem; font: 700 .82rem/1 Inter, system-ui, sans-serif; box-shadow: none; opacity: 1;
+  transition: background .2s, color .2s, transform .15s;
+}
+.cv-btn:hover { background: var(--ink); color: var(--bg); box-shadow: none; opacity: 1; }
