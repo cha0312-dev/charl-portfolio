@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#dedede">
+    <meta name="color-scheme" content="light">
   <title>Charly D. Domingo | Personal website</title>
   <meta name="description" content="Personal website of Charly D. Domingo, BS Information Technology student: about, skills, education, projects and contact.">
   <meta property="og:type" content="website">
@@ -24,8 +25,8 @@
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=85">
   <noscript><style>.loader{display:none!important}body.is-loading{overflow:auto!important}</style></noscript>
 </head>
 <body class="is-loading">
@@ -33,8 +34,8 @@
   <div class="loader" role="status" aria-live="polite" aria-label="Portfolio loading">
     <div class="loader-inner">
       <p class="loader-word">Charly</p>
-      <p class="loader-label" aria-hidden="true">Portfolio loading</p>
-      <div class="loader-bar" aria-hidden="true"><i></i></div>
+      <div class="seg-bar" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="seg-label" aria-hidden="true">Loading<span class="seg-dots"></span></p>
     </div>
   </div>
 
@@ -52,16 +53,6 @@
       <a class="nav-cv" href="Charly-Domingo-Resume.pdf" download="Charly-Domingo-Resume.pdf"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download CV</a>
     </nav>
     <div class="hdr-right">
-    <button class="theme-btn" role="switch" aria-checked="true" aria-label="Dark mode" title="Switch light or dark mode">
-      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="12" r="5"/>
-        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-      </svg>
-      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-      <span class="knob" aria-hidden="true"></span>
-    </button>
     <a class="cv-btn" href="Charly-Domingo-Resume.pdf" download="Charly-Domingo-Resume.pdf" title="Download my resume (PDF)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download CV</a>
     </div>
     <div class="progress" aria-hidden="true"></div>
@@ -128,7 +119,8 @@
         <article class="ab-card ab-time s4" data-phase="day">
           <h3 class="ab-title">Local time</h3>
           <svg class="ab-analog" viewBox="0 0 100 100" aria-hidden="true">
-            <circle class="face" cx="50" cy="50" r="46"/>
+            <rect class="face-shadow" x="10" y="10" width="90" height="90"/>
+            <rect class="face" x="5" y="5" width="90" height="90"/>
             <circle class="ticks" cx="50" cy="50" r="38"/>
             <line class="hand hr" x1="50" y1="50" x2="50" y2="29"/>
             <line class="hand mn" x1="50" y1="50" x2="50" y2="18"/>
@@ -142,7 +134,7 @@
 
         <article class="ab-card s4">
           <h3 class="ab-title">Contact details</h3>
-          <ul class="ab-list">
+          <ul class="ab-list box3d">
             <li style="--c:#16a34a"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span><div><strong>Phone</strong><a href="tel:+639631839766">+63 9631 839 766</a></div></li>
             <li style="--c:#dc2626"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><div><strong>Location</strong><span>Maragusan, Davao de Oro</span></div></li>
             <li style="--c:#2563eb"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg></span><div><strong>Email</strong><a href="mailto:charlydomingo281@gmail.com">charlydomingo281@gmail.com</a></div></li>
@@ -151,7 +143,7 @@
 
         <article class="ab-card s4">
           <h3 class="ab-title live">Currently</h3>
-          <ul class="ab-list">
+          <ul class="ab-list box3d">
             <li style="--c:#4f46e5"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg></span><div><strong>Building</strong><span>Websites and apps</span></div></li>
             <li style="--c:#d97706"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36z"/></svg></span><div><strong>Exploring</strong><span>UI UX design</span></div></li>
             <li style="--c:#0d9488"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><div><strong>Learning</strong><span>Web development and Dart</span></div></li>
@@ -202,34 +194,53 @@
       <div class="ab edu">
         <article class="ab-card s6">
           <h3 class="ab-title">School history</h3>
-          <ol class="edu-tl">
-            <li>
-              <p class="edu-when">2022 &ndash; Present</p>
-              <h4>BS Information Technology</h4>
-              <p class="edu-school">University of Mindanao, Tagum College</p>
+          <ul class="ftree" aria-label="School history">
+            <li class="ft-dir ft-root"><span class="ft-row"><svg class="ft-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/></svg><span class="ft-name">education</span></span>
+              <ul>
+              <li class="ft-dir"><span class="ft-row"><svg class="ft-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/></svg><span class="ft-name">college</span></span>
+                <ul>
+                  <li class="ft-file is-current"><span class="ft-row"><svg class="ft-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span class="ft-name">BS Information Technology<small>University of Mindanao, Tagum College &middot; <span class="ft-when">2022 &ndash; Present</span></small></span></span></li>
+                </ul>
+              </li>
+              <li class="ft-dir"><span class="ft-row"><svg class="ft-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/></svg><span class="ft-name">senior-high</span></span>
+                <ul>
+                  <li class="ft-file"><span class="ft-row"><svg class="ft-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span class="ft-name">Senior High School<small>Maragusan National High School &middot; <span class="ft-when">2020 &ndash; 2022</span></small></span></span></li>
+                </ul>
+              </li>
+              <li class="ft-dir"><span class="ft-row"><svg class="ft-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/></svg><span class="ft-name">junior-high</span></span>
+                <ul>
+                  <li class="ft-file"><span class="ft-row"><svg class="ft-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span class="ft-name">Junior High School<small>New Albay National High School &middot; <span class="ft-when">2016 &ndash; 2020</span></small></span></span></li>
+                </ul>
+              </li>
+              </ul>
             </li>
-            <li>
-              <p class="edu-when">2020 &ndash; 2022</p>
-              <h4>Senior High School</h4>
-              <p class="edu-school">Maragusan National High School</p>
-            </li>
-            <li>
-              <p class="edu-when">2016 &ndash; 2020</p>
-              <h4>Junior High School</h4>
-              <p class="edu-school">New Albay National High School</p>
-            </li>
-          </ol>
+          </ul>
         </article>
 
         <article class="ab-card s6">
           <h3 class="ab-title">Training &amp; seminars</h3>
-          <ul class="ab-list tr-list">
-            <li style="--c:#16a34a"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8 13a4 4 0 0 1 8 0"/><circle cx="12" cy="13.5" r="1.2"/><path d="M12 15v6M9 21h6"/></svg></span><div><strong>Smart Communications, Inc</strong><span>Telecommunications</span></div><em class="tr-year">2025</em></li>
-            <li style="--c:#0891b2"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-4M11 16V8M15 16v-6M19 16V5"/></svg></span><div><strong>Dynata Philippines, Inc</strong><span>Data &amp; market research</span></div><em class="tr-year">2025</em></li>
-            <li style="--c:#9f1239"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 15c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.1 2.1 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3 2-4c1.6-1.1 5 0 5 0M12 15v5s3-.6 4-2c1.1-1.6 0-5 0-5"/></svg></span><div><strong>UP Cebu Business Incubator for IT</strong><span>Startups &amp; innovation</span></div><em class="tr-year">2025</em></li>
-            <li style="--c:#2563eb"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M4 10h16M12 3l8 5H4z"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/></svg></span><div><strong>JPMorgan Chase &amp; Co.</strong><span>Finance &amp; technology</span></div><em class="tr-year">2025</em></li>
-            <li style="--c:#ea580c"><span class="ab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6"/></svg></span><div><strong>Rivan IT Cebu</strong><span>IT &amp; networking</span></div><em class="tr-year">2025</em></li>
-          </ul>
+          <ol class="gtl">
+            <li class="is-first">
+              <span class="gtl-node"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8 13a4 4 0 0 1 8 0"/><circle cx="12" cy="13.5" r="1.2"/><path d="M12 15v6M9 21h6"/></svg></span>
+              <div class="gtl-body"><strong>Smart Communications, Inc</strong><span class="gtl-sub">Telecommunications</span><span class="gtl-when">in 2025</span></div>
+            </li>
+            <li>
+              <span class="gtl-node"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-4M11 16V8M15 16v-6M19 16V5"/></svg></span>
+              <div class="gtl-body"><strong>Dynata Philippines, Inc</strong><span class="gtl-sub">Data &amp; market research</span><span class="gtl-when">in 2025</span></div>
+            </li>
+            <li>
+              <span class="gtl-node"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 15c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2.1-.1-2.9a2.1 2.1 0 0 0-2.9-.1z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.9A12.9 12.9 0 0 1 22 2c0 2.7-.8 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.6-3 2-4c1.6-1.1 5 0 5 0M12 15v5s3-.6 4-2c1.1-1.6 0-5 0-5"/></svg></span>
+              <div class="gtl-body"><strong>UP Cebu Business Incubator for IT</strong><span class="gtl-sub">Startups &amp; innovation</span><span class="gtl-when">in 2025</span></div>
+            </li>
+            <li>
+              <span class="gtl-node"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M4 10h16M12 3l8 5H4z"/><path d="M6 10v8M10 10v8M14 10v8M18 10v8"/></svg></span>
+              <div class="gtl-body"><strong>JPMorgan Chase &amp; Co.</strong><span class="gtl-sub">Finance &amp; technology</span><span class="gtl-when">in 2025</span></div>
+            </li>
+            <li>
+              <span class="gtl-node"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01M11 6.5h6M11 17.5h6"/></svg></span>
+              <div class="gtl-body"><strong>Rivan IT Cebu</strong><span class="gtl-sub">IT &amp; networking</span><span class="gtl-when">in 2025</span></div>
+            </li>
+          </ol>
         </article>
 
       </div>
@@ -242,7 +253,7 @@
         <li class="featured">
           <div class="proj-preview shot">
             <div class="pv-bar"><i></i><i></i><i></i><span>charly.dev</span></div>
-            <img src="images/po.png?v=2" width="1400" height="715" alt="Screenshot of the home page of my personal website" loading="lazy" onerror="this.style.visibility='hidden'">
+            <img src="images/po.png?v=3" width="1400" height="715" alt="Screenshot of the home page of my personal website" loading="lazy" onerror="this.style.visibility='hidden'">
           </div>
           <div class="proj-info">
             <p class="proj-meta"><span class="hot">Featured</span><span>Personal project</span><span>2026</span></p>
@@ -347,7 +358,7 @@
   </main>
 
   <footer>
-    <p>&copy; <span id="year"></span> Charly D. Domingo</p>
+    <p><span class="copy-box" aria-label="Copyright">&copy;</span> <span id="year"></span> Charly D. Domingo</p>
   </footer>
 
   <div class="toast" role="status" aria-live="polite"></div>
@@ -360,15 +371,20 @@
     <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Chat with Charly's assistant">
       <header class="chat-head">
         <span class="chat-avatar" aria-hidden="true">C</span>
-        <div><strong>Charly's assistant</strong><span><i></i>Online</span></div>
+        <div><strong>Chat &ndash; Charly's Assistant</strong><span><i></i>Online</span></div>
+        <span class="win-btn win-min" aria-hidden="true"></span>
+        <span class="win-btn win-max" aria-hidden="true"></span>
         <button class="chat-close" type="button" aria-label="Close chat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </header>
+      <div class="win-menu" aria-hidden="true"><span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span></div>
       <div class="chat-log" role="log" aria-live="polite"></div>
       <div class="chat-chips" aria-label="Suggested questions"></div>
       <form class="chat-form" autocomplete="off">
-        <input type="text" name="q" placeholder="Type a message..." aria-label="Type your message" maxlength="200">
-        <button type="submit" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+        <span class="win-q" aria-hidden="true">Query:</span>
+        <input type="text" name="q" placeholder="Enter your question..." aria-label="Type your message" maxlength="200">
+        <button type="submit" aria-label="Send">Send</button>
       </form>
+      <div class="win-status" aria-hidden="true"><span class="win-ready">Ready</span><b>ONLINE</b><b>EN</b><i class="win-grip"></i></div>
     </div>
     <button class="chat-fab" type="button" aria-label="Open chat" aria-expanded="false" aria-controls="chat-panel">
       <svg class="i-chat" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg>
@@ -377,6 +393,6 @@
     </button>
   </div>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=11"></script>
 </body>
 </html>

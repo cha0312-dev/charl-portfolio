@@ -1,7 +1,6 @@
 const root = document.documentElement;
 const nav = document.getElementById('nav');
 const menuBtn = document.querySelector('.menu-btn');
-const themeBtn = document.querySelector('.theme-btn');
 
 /* Footer year */
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -18,42 +17,9 @@ nav.addEventListener('click', (e) => {
   }
 });
 
-/* Theme toggle (remembers the choice) */
-function applyTheme(theme) {
-  root.setAttribute('data-theme', theme);
-  themeBtn.setAttribute('aria-checked', theme === 'dark');
-}
-let saved = null;
-try { saved = localStorage.getItem('theme'); } catch (e) {}
-applyTheme(saved || 'light');
-
-themeBtn.addEventListener('click', () => {
-  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  const prev = root.getAttribute('data-theme');
-  const change = () => {
-    applyTheme(next);
-    try { localStorage.setItem('theme', next); } catch (e) {}
-    themeToast(next, prev);
-  };
-  themeBtn.classList.add('squish');
-  setTimeout(() => themeBtn.classList.remove('squish'), 450);
-
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (!document.startViewTransition || calm) { change(); return; }
-
-  /* The new theme spreads out from the switch like a circle */
-  const r = themeBtn.getBoundingClientRect();
-  const x = r.left + r.width / 2;
-  const y = r.top + r.height / 2;
-  const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-  const transition = document.startViewTransition(change);
-  transition.ready.then(() => {
-    root.animate(
-      { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + radius + 'px at ' + x + 'px ' + y + 'px)'] },
-      { duration: 650, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
-    );
-  });
-});
+/* Light mode only (dark mode removed) */
+root.setAttribute('data-theme', 'light');
+try { localStorage.removeItem('theme'); } catch (e) {}
 
 /* Highlight the nav link for the section on screen */
 const links = document.querySelectorAll('nav a');
@@ -409,7 +375,8 @@ document.querySelectorAll('.cap-card').forEach((card) => {
 (function () {
   const loader = document.querySelector('.loader');
   if (!loader) return;
-  const bar = loader.querySelector('.loader-bar i');
+  const segs = [...loader.querySelectorAll('.seg-bar i')];
+  const light = (pct) => { const n = Math.round(pct / 10); segs.forEach((s, i) => s.classList.toggle('on', i < n)); };
   const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const MIN = calm ? 300 : 1400;   /* shortest time the screen stays up */
   const MAX = 5000;                /* never get stuck if something loads slowly */
@@ -424,7 +391,7 @@ document.querySelectorAll('.cap-card').forEach((card) => {
   function finish() {
     if (finished) return;
     finished = true;
-    bar.style.transform = 'scaleX(1)';
+    light(100);
     setTimeout(() => {
       loader.classList.add('done');
       document.body.classList.remove('is-loading');
@@ -438,7 +405,7 @@ document.querySelectorAll('.cap-card').forEach((card) => {
     /* Eases toward 90% while waiting, then completes once loaded and MIN has passed */
     const target = pageLoaded && t >= MIN ? 100 : Math.min(90, (t / MIN) * 90);
     const shown = Math.round(target);
-    bar.style.transform = 'scaleX(' + (shown / 100) + ')';
+    light(shown);
     if (shown >= 100 || t >= MAX) finish();
     else requestAnimationFrame(tick);
   }
@@ -503,7 +470,6 @@ document.querySelectorAll('.ab-card').forEach((card, i) => {
     { re: /contact|email|mail|phone|call|number|reach|hire|message|touch/, a: 'You can email charlydomingo281@gmail.com, call +63 9631 839 766.', link: ['Go to contact', '#contact'] },
     { re: /where|location|live|from|city|maragusan|davao/, a: 'Charly is based in Maragusan, Davao de Oro, in the Philippines.', link: ['See details', '#about'] },
     { re: /time|clock/, a: () => 'It is ' + new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit' }) + ' in Maragusan right now.' },
-    { re: /dark|light|theme|color|colour|accent|mode/, a: 'Use the sun and moon switch in the top bar for dark or light mode.' },
     { re: /who|about|charly|yourself|you do|introduce/, a: 'Charly D. Domingo is a BS Information Technology student who builds websites and designs simple, user-friendly interfaces.', link: ['About Charly', '#about'] },
     { re: /thank|thanks|bye|great|cool|nice/, a: "You're welcome! Let me know if you want to know anything else." }
   ];
@@ -763,3 +729,11 @@ document.querySelectorAll('.gallery').forEach((g) => {
   g.querySelector('.gal-prev').addEventListener('click', () => show(i - 1));
   g.querySelector('.gal-next').addEventListener('click', () => show(i + 1));
 });
+
+/* Chat window status bar: shows "Typing..." while the assistant answers */
+(function () {
+  const log = document.querySelector('.chat-log');
+  const st = document.querySelector('.win-ready');
+  if (!log || !st) return;
+  new MutationObserver(() => { st.textContent = log.querySelector('.typing') ? 'Typing...' : 'Ready'; }).observe(log, { childList: true, subtree: true });
+})();
