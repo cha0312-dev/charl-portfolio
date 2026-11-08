@@ -737,3 +737,496 @@ document.querySelectorAll('.gallery').forEach((g) => {
   if (!log || !st) return;
   new MutationObserver(() => { st.textContent = log.querySelector('.typing') ? 'Typing...' : 'Ready'; }).observe(log, { childList: true, subtree: true });
 })();
+
+/* ===================== Ladder + pixel climber =====================
+   A ladder runs down the left side from About to the bottom of the page.
+   Above About he stands on a ledge; scroll down and he jumps onto the ladder, grabs it, and climbs
+   hand over hand with your scrolling (one pose per rung). Stop scrolling and he rests and looks at the page;
+   reach the bottom and he steps off; scroll up and he climbs back and hops onto the ledge. */
+(function () {
+  const ladder = document.querySelector('.ladder');
+  const ledge = document.querySelector('.ledge');
+  const guy = document.querySelector('.climber');
+  const about = document.getElementById('about');
+  const scene = document.querySelector('.end-scene');
+  if (!ladder || !guy || !about) return;
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wide = window.matchMedia('(min-width: 1240px)');
+  const LW = 55;                          /* ladder width */
+  const OFF = (767 - 587) * 0.22;         /* ladder middle inside the climbing sprites */
+  const CLIMB_H = 119, STAND_H = 106, STAND_W = 83, RUNG = 16.5, STEP = RUNG * 2.5;   /* one pose every 2.5 rungs = slower climb */
+  const CYCLE = ['a', 'b', 'am', 'b'];    /* right hand up → both up → left hand up → both up */
+  let top = 0, bottom = 0, left = 0, state = 'stand', jumping = false, curY = null, raf = 0;
+  let landUntil = 0, lastMove = 0, idleTimer = 0, bottomSince = 0;
+
+  function layout() {
+    const docH = document.documentElement.scrollHeight;
+    const r = about.getBoundingClientRect();
+    top = Math.round(r.top + window.scrollY + 40);
+    bottom = docH - 74;            /* ground level: the ending platform sits here */
+    const vw = document.documentElement.clientWidth;
+    let edge = vw;
+    document.querySelectorAll('main section:not(.hero) > *, .site-header').forEach((el) => {
+      const rr = el.getBoundingClientRect(); if (rr.width && rr.width < vw - 4) edge = Math.min(edge, rr.left);
+    });
+    const room = edge - 26 - LW - 22;
+    left = Math.round(Math.min(edge - 26 - LW, Math.max(116, 22 + Math.max(0, room / 2))));
+    const fits = left >= 100;
+    [ladder, ledge, guy, scene].forEach((el) => el && el.classList.toggle('no-room', !fits));
+    ladder.style.left = left + 'px'; ladder.style.top = top + 'px'; ladder.style.height = (bottom - top) + 'px';
+    ledge.style.left = '0px'; ledge.style.width = Math.max(0, left - 16) + 'px'; ledge.style.top = top + 'px';
+    placeScene();
+  }
+  const standPos = () => ({ x: left - 16 - STAND_W + 2, y: top - CLIMB_H + 2 });
+  function climbPos() {
+    /* he rides at ~45% of the screen, then in the last screen of scrolling he climbs all the way to the bottom */
+    const vh = window.innerHeight, maxY = document.documentElement.scrollHeight - vh;
+    const endT = Math.min(1, Math.max(0, (window.scrollY - (maxY - vh)) / vh));
+    const anchor = window.scrollY + vh * (0.45 + 0.55 * endT);
+    const y = Math.min(bottom - CLIMB_H, Math.max(top + 6, anchor - CLIMB_H / 2));
+    return { x: left + LW / 2 - OFF, y };
+  }
+  const place = (p) => { guy.style.left = p.x + 'px'; guy.style.top = p.y + 'px'; };
+  const pose = (p) => { if (guy.dataset.pose !== p) guy.dataset.pose = p; };
+
+  function jump(from, to, dir, done) {
+    if (calm || !guy.animate) { done(); return; }
+    jumping = true; guy.dataset.state = 'jump'; guy.dataset.dir = dir; place(from);
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const a = guy.animate([
+      { transform: 'translate(0,0)' },
+      { transform: 'translate(' + dx * .5 + 'px,' + (Math.min(0, dy) * .5 - 46) + 'px)', offset: .45 },
+      { transform: 'translate(' + dx + 'px,' + dy + 'px)' },
+    ], { duration: 520, easing: 'cubic-bezier(.3,.6,.4,1)' });
+    a.onfinish = () => { jumping = false; done(); update(); };
+  }
+
+
+  /* ---------- ending scene: ground, chest, speech bubble ---------- */
+  const eGround = scene && scene.querySelector('.end-ground');
+  const eGuy = scene && scene.querySelector('.end-guy');
+  const eKneel = scene && scene.querySelector('.end-kneel');
+  const eBubble = scene && scene.querySelector('.end-bubble');
+  const eText = eBubble && eBubble.querySelector('span');
+  const chest = scene && scene.querySelector('.end-chest');
+  function placeScene() {
+    if (!scene) return;
+    const gx = left - 18, standX = left + LW + 10, chestX = left + LW + 10 + 83 + 26;
+    eGround.style.left = gx + 'px'; eGround.style.top = (bottom - 6) + 'px';
+    eGuy.style.left = standX + 'px'; eGuy.style.top = (bottom - 98) + 'px';
+    chest.style.left = chestX + 'px'; chest.style.top = (bottom - 87) + 'px';
+    eBubble.style.left = (standX + 22) + 'px'; eBubble.style.top = (bottom - 98 - 108) + 'px';
+    /* kneeling picture: line its chest up with the real chest */
+    eKneel.style.left = (chestX + 13.75 - 71.8) + 'px'; eKneel.style.top = (bottom - 87 + 86 - 144.6) + 'px';
+  }
+  function toGround(on) {
+    if (!scene) return;
+    scene.classList.toggle('at-ground', on);
+    guy.classList.toggle('off-ladder', on);
+  }
+  if (chest) chest.addEventListener('click', (e) => {
+    if (chest.dataset.state === 'open') return;             /* already open: let the link download the CV */
+    e.preventDefault();
+    if (chest.dataset.state !== 'closed') return;
+    const atGround = scene.classList.contains('at-ground');
+    const finish = () => {
+      scene.classList.remove('kneeling');
+      chest.dataset.state = 'half';
+      if (atGround) eGuy.dataset.pose = 'cheer';
+      setTimeout(() => {
+        chest.dataset.state = 'open';
+        chest.setAttribute('aria-label', 'Download my CV (PDF)');
+        eText.textContent = "You found my CV! Click the chest 📄";
+        toGround(true);
+      }, calm ? 0 : 320);
+    };
+    if (atGround && !calm) { scene.classList.add('kneeling'); setTimeout(finish, 750); } else finish();
+  });
+
+  /* ---------- Skills loot box ----------
+     When he climbs past "What I Can Do" he pulls out a box, throws it onto the tech grid,
+     it lands with a puff, pops open, the keycaps fly out into their slots, and the box vanishes. Once per visit. */
+  const techList = document.querySelector('#skills ul.tech');
+  const lootBox = document.querySelector('.loot');
+  const L = lootBox ? {
+    fly: lootBox.querySelector('.lt-fly'), closed: lootBox.querySelector('.lt-closed'), pop: lootBox.querySelector('.lt-pop'),
+    open: lootBox.querySelector('.lt-open'), dust: lootBox.querySelector('.lt-dust'), poof: lootBox.querySelector('.lt-poof'),
+  } : null;
+  let lootDone = !techList || !lootBox || calm || !guy.animate, looting = false;
+  const lootReady = () => wide.matches && !guy.classList.contains('no-room');
+  if (!lootDone) techList.classList.add('loot-wait');
+  function revealKeys() {             /* plain fallback when the climber is not around */
+    if (!techList.classList.contains('loot-wait')) return;
+    lootDone = true;
+    techList.querySelectorAll('li').forEach((li, i) => {
+      li.classList.add('got');
+      if (li.animate && !calm) li.animate([{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)' }],
+        { duration: 300, delay: i * 40, easing: 'cubic-bezier(.3,1.5,.5,1)', fill: 'backwards' });
+    });
+    techList.classList.remove('loot-wait');
+  }
+  if (!lootDone && 'IntersectionObserver' in window) {
+    new IntersectionObserver((en) => {
+      if (!en[0].isIntersecting || lootDone) return;
+      if (!lootReady()) revealKeys();
+      else setTimeout(() => { if (!lootDone && !looting) revealKeys(); }, 3500);   /* safety net if he never gets there */
+    }, { threshold: .4 }).observe(techList);
+  }
+  wide.addEventListener && wide.addEventListener('change', () => { if (!lootReady() && !looting) revealKeys(); });
+  function lootTime() {
+    if (lootDone || looting || state !== 'climb' || !lootReady()) return false;
+    const r = techList.getBoundingClientRect(), vh = window.innerHeight;
+    return r.top < vh * .6 && r.bottom > vh * .3;
+  }
+  function sprite(img, cx, by, show) {     /* place a loot picture by its bottom-centre */
+    img.style.left = (cx - img.width / 2) + 'px'; img.style.top = (by - img.height) + 'px';
+    img.classList.toggle('show', show !== false);
+  }
+  function playLoot() {
+    looting = true; lootDone = true;
+    const gx = parseFloat(guy.style.left), gy = parseFloat(guy.style.top);
+    /* landing spot: the empty space after the last keycap (or under the grid if the last row is full) */
+    const tr = techList.getBoundingClientRect(), keys = techList.querySelectorAll('li'), last = keys[keys.length - 1].getBoundingClientRect();
+    const roomRight = tr.right - last.right > 90;
+    const lx = (roomRight ? (last.right + tr.right) / 2 : tr.left + tr.width / 2) + window.scrollX;
+    const ly = (roomRight ? last.bottom : tr.bottom + 70) + window.scrollY;
+    const at = (ms, fn) => setTimeout(fn, ms);
+    lootBox.classList.add('on');
+    pose('hold');
+    /* 1. throw */
+    at(650, () => {
+      pose('throw');
+      const sx = gx + 100, sy = gy + 72;
+      sprite(L.fly, sx, sy);
+      const dx = lx - sx, dy = ly - sy;
+      L.fly.animate([
+        { transform: 'translate(0,0) rotate(-20deg) scale(.42)' },
+        { transform: 'translate(' + dx * .5 + 'px,' + (Math.min(0, dy) - 120) + 'px) rotate(160deg) scale(.75)', offset: .5 },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(340deg) scale(1)' },
+      ], { duration: 620, easing: 'cubic-bezier(.35,.5,.6,1)' });
+    });
+    /* 2. land with a puff of dust */
+    at(1270, () => {
+      L.fly.classList.remove('show');
+      sprite(L.closed, lx, ly);
+      L.closed.animate([{ transform: 'scale(1.25,.7)', transformOrigin: '50% 100%' }, { transform: 'scale(.9,1.12)', transformOrigin: '50% 100%', offset: .5 }, { transform: 'none', transformOrigin: '50% 100%' }], { duration: 300 });
+      sprite(L.dust, lx, ly + 4);
+      L.dust.animate([{ opacity: 1, transform: 'scale(.6,.8)' }, { opacity: 1, transform: 'scale(1)', offset: .5 }, { opacity: 0, transform: 'scale(1.15)' }], { duration: 450, fill: 'forwards' })
+        .onfinish = () => L.dust.classList.remove('show');
+      setTimeout(() => { pose('idle'); }, 300);
+    });
+    /* 3. wiggle, then pop */
+    at(1650, () => {
+      L.closed.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-8deg)' }, { transform: 'rotate(8deg)' }, { transform: 'rotate(-5deg)' }, { transform: 'rotate(0)' }],
+        { duration: 380, easing: 'steps(5)' });
+    });
+    at(2080, () => {
+      L.closed.classList.remove('show');
+      sprite(L.pop, lx, ly);
+      L.pop.animate([{ transform: 'scale(.8)' }, { transform: 'scale(1.1)' }, { transform: 'scale(1)' }], { duration: 220 });
+      /* 4. keycaps fly out of the box into their slots */
+      const ox = lx, oy = ly - 30;
+      techList.querySelectorAll('li').forEach((li, i) => {
+        const r = li.getBoundingClientRect();
+        const dx = ox - (r.left + r.width / 2 + window.scrollX), dy = oy - (r.top + r.height / 2 + window.scrollY);
+        li.classList.add('got');
+        li.animate([
+          { opacity: 0, transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.25)' },
+          { opacity: 1, transform: 'translate(' + dx * .45 + 'px,' + (dy * .45 - 70) + 'px) scale(.8)', offset: .45 },
+          { opacity: 1, transform: 'translate(0,-6px) scale(1.06)', offset: .82 },
+          { opacity: 1, transform: 'translate(0,4px) scale(1)', offset: .92 },
+          { opacity: 1, transform: 'none' },
+        ], { duration: 560, delay: i * 75, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'backwards' });
+      });
+    });
+    at(2400, () => { L.pop.classList.remove('show'); sprite(L.open, lx, ly); });
+    /* 5. the empty box vanishes in a poof */
+    at(2080 + 75 * 10 + 500, () => {
+      L.open.classList.remove('show');
+      sprite(L.poof, lx, ly + 16);
+      L.poof.animate([{ opacity: 1, transform: 'scale(.5)' }, { opacity: 1, transform: 'scale(1.05)', offset: .4 }, { opacity: 0, transform: 'scale(1.2)' }], { duration: 520, fill: 'forwards' })
+        .onfinish = () => { L.poof.classList.remove('show'); lootBox.classList.remove('on'); };
+      techList.classList.remove('loot-wait');
+      looting = false; lastMove = performance.now() - 1000; req();
+    });
+  }
+
+  /* ---------- Education scenes ----------
+     School history: he puts on a graduation cap, tosses it, it lands on the BS IT file and the progress bar fills.
+     Training: certificates pop out of each timeline item and fly to him; the counter goes up to 5/5. */
+  const fx = document.querySelector('.edu-fx');
+  const capImg = fx && fx.querySelector('.fx-cap'), bubble = fx && fx.querySelector('.fx-bubble');
+  const curFile = document.querySelector('.ft-file.is-current');
+  const schoolCard = curFile && curFile.closest('.ab-card');
+  const nodes = [...document.querySelectorAll('.gtl .gtl-node')];
+  const trainCard = nodes.length ? nodes[0].closest('.ab-card') : null;
+  const counter = document.querySelector('.cert-count'), counterNum = counter && counter.querySelector('b');
+  const docXY = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + window.scrollX, y: r.top + window.scrollY, w: r.width, h: r.height }; };
+  const after = (ms, fn) => setTimeout(fn, ms);
+
+  /* progress to graduation: Aug 2022 → Apr 2027 */
+  const START = new Date(2022, 7, 1), END = new Date(2027, 3, 30);
+  const PCT = Math.max(0, Math.min(100, Math.round((Date.now() - START) / (END - START) * 100)));
+  function fillBar(animated) {
+    if (!curFile) return;
+    const segs = curFile.querySelectorAll('.fp-bar i'), out = curFile.querySelector('.fp-pct');
+    const full = Math.floor(PCT / 10), half = PCT % 10 >= 5;
+    segs.forEach((seg, i) => {
+      const set = () => { seg.classList.toggle('on', i < full); seg.classList.toggle('half', i === full && half);
+        if (out) out.textContent = Math.min(PCT, (i + 1) * 10) + '%'; };
+      animated ? after(i * 90, set) : set();
+    });
+    if (out) animated ? after(segs.length * 90, () => { out.textContent = PCT + '%'; }) : (out.textContent = PCT + '%');
+  }
+  function putCap() {
+    if (!curFile || curFile.querySelector('.ft-cap')) return;
+    const c = new Image(); c.src = capImg ? capImg.src : 'images/climber/gradcap.png'; c.className = 'ft-cap'; c.alt = ''; c.setAttribute('aria-hidden', 'true');
+    curFile.appendChild(c); return c;
+  }
+  function setCount(n) {
+    if (!counter) return;
+    counterNum.textContent = n >= nodes.length ? nodes.length + '/' + nodes.length + ' collected ✓' : n + '/' + nodes.length;
+    counter.classList.toggle('done', n >= nodes.length);
+    counter.classList.remove('bump'); void counter.offsetWidth; counter.classList.add('bump');
+  }
+
+  const scenes = [];
+  if (curFile && schoolCard && fx) scenes.push({
+    el: schoolCard, done: false,
+    when: (r, vh) => r.top < vh * .5 && r.bottom > vh * .45,
+    finish() { this.done = true; putCap(); fillBar(false); },
+    play() {
+      const gx = parseFloat(guy.style.left), gy = parseFloat(guy.style.top);
+      pose('capon');
+      bubble.style.left = (gx + 120) + 'px'; bubble.style.top = (gy - 18) + 'px'; bubble.classList.add('show');
+      after(1000, () => {
+        pose('cheer');
+        const sx = gx + 46 + 12, sy = gy - 8;                  /* cap leaves his head */
+        const cr = curFile.getBoundingClientRect();
+        const tx = cr.right + window.scrollX - 10 - 44, ty = cr.top + window.scrollY - 14;
+        capImg.style.left = sx + 'px'; capImg.style.top = sy + 'px'; capImg.classList.add('show');
+        const dx = tx - sx, dy = ty - sy;
+        capImg.animate([
+          { transform: 'translate(0,0) rotate(0) scale(1.1)' },
+          { transform: 'translate(' + dx * .35 + 'px,' + (Math.min(0, dy) - 190) + 'px) rotate(380deg) scale(1)', offset: .45 },
+          { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(730deg) scale(.79)' },
+        ], { duration: 1050, easing: 'cubic-bezier(.3,.55,.55,1)' }).onfinish = () => {
+          capImg.classList.remove('show');
+          const c = putCap();
+          if (c && c.animate) c.animate([{ transform: 'rotate(10deg) translateY(-6px) scale(1.15,.8)' }, { transform: 'rotate(10deg)' }], { duration: 220, easing: 'steps(3)' });
+          curFile.classList.add('ping'); after(1300, () => curFile.classList.remove('ping'));
+          fillBar(true);
+        };
+      });
+      after(2100, () => { bubble.classList.remove('show'); pose('idle'); });
+      after(2900, () => { this.done = true; looting = false; lastMove = performance.now() - 1000; req(); });
+    },
+  });
+  if (trainCard && fx && counter) scenes.push({
+    el: trainCard, done: false,
+    when: (r, vh) => r.top < vh * .55 && r.bottom > vh * .4,
+    finish() { this.done = true; nodes.forEach((n) => n.classList.add('got')); setCount(nodes.length); },
+    play() {
+      const gx = parseFloat(guy.style.left), gy = parseFloat(guy.style.top);
+      const hx = gx + 32 + 74, hy = gy + 9 + 30;             /* his open hand */
+      pose('reach');
+      let got = 0;
+      nodes.forEach((n, i) => after(250 + i * 420, () => {
+        const p = docXY(n), cert = new Image();
+        cert.src = 'images/climber/cert.png'; cert.className = 'fx-cert show'; cert.alt = '';
+        const sx = p.x + p.w / 2 - 21.5, sy = p.y + p.h / 2 - 14.5;
+        cert.style.left = sx + 'px'; cert.style.top = sy + 'px'; fx.appendChild(cert);
+        n.classList.add('got');
+        const dx = hx - 21.5 - sx, dy = hy - 14.5 - sy;
+        const a = cert.animate([
+          { transform: 'translate(0,0) scale(0)' },
+          { transform: 'translate(0,-26px) scale(1.15)', offset: .22 },
+          { transform: 'translate(0,-26px) scale(1)', offset: .32 },
+          { transform: 'translate(' + dx * .5 + 'px,' + (dy * .5 - 120) + 'px) rotate(-14deg) scale(.9)', offset: .66 },
+          { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(-24deg) scale(.6)' },
+        ], { duration: 900, easing: 'cubic-bezier(.3,.6,.5,1)' });
+        a.onfinish = () => { cert.remove(); setCount(++got); };
+      }));
+      const end = 250 + (nodes.length - 1) * 420 + 920;
+      after(end, () => pose('certs'));
+      after(end + 1400, () => { this.done = true; looting = false; lastMove = performance.now() - 1000; req(); });
+    },
+  });
+  /* Projects: when the visitor clicks Previous or Next, he points his remote and "presses" it for them */
+  const projList = document.querySelector('.projects');
+  const zap = fx && fx.querySelector('.fx-zap'), clickTag = fx && fx.querySelector('.fx-click');
+  let remoteOn = false, remoteTimer = 0;
+  if (projList && zap && !calm && guy.animate) projList.addEventListener('click', (e) => {
+    const hit = e.target.closest('.proj-next, .proj-prev');
+    if (!hit || !e.isTrusted) return;
+    if (!lootReady() || state !== 'climb' || jumping || (looting && !remoteOn)) return;
+    /* the slider has already switched; aim at the same button on the card now showing */
+    const cur = [...projList.querySelectorAll(':scope > .featured')].find((x) => !x.hidden);
+    const btn = (cur && cur.querySelector(hit.classList.contains('proj-next') ? '.proj-next' : '.proj-prev')) || hit;
+    const gx = parseFloat(guy.style.left), gy = parseFloat(guy.style.top);
+    const tipX = gx + 62, tipY = gy + 46;           /* front of the remote */
+    const bb = docXY(btn), bx = bb.x + bb.w / 2, by = bb.y + bb.h / 2;
+    remoteOn = true; looting = true; clearTimeout(remoteTimer);
+    pose('press');
+    zap.getAnimations().forEach((an) => an.cancel());
+    zap.style.left = tipX + 'px'; zap.style.top = tipY + 'px'; zap.classList.add('show');
+    const ang = Math.atan2(by - tipY, bx - tipX) * 180 / Math.PI;
+    zap.animate([
+      { transform: 'translate(0,0) rotate(' + ang + 'deg)' },
+      { transform: 'translate(' + (bx - tipX) + 'px,' + (by - tipY) + 'px) rotate(' + ang + 'deg)' },
+    ], { duration: 300, easing: 'steps(8)' }).onfinish = () => {
+      zap.classList.remove('show');
+      clickTag.style.left = (bx - 22) + 'px'; clickTag.style.top = (bb.y - 26) + 'px';
+      clickTag.classList.remove('show'); void clickTag.offsetWidth; clickTag.classList.add('show');
+    };
+    setTimeout(() => { if (remoteOn) pose('remote'); }, 450);
+    remoteTimer = setTimeout(() => { remoteOn = false; looting = false; lastMove = performance.now() - 1000; req(); }, 1300);
+  });
+
+  /* Contact: when the visitor picks Email, Call or Text he acts it out and points them to the send button.
+     The first time Contact comes into view he does it once on his own for the method that is selected. */
+  const ctCard = document.querySelector('.ct-main');
+  const ctGo = ctCard && ctCard.querySelector('.ct-go');
+  const plane = fx && fx.querySelector('.fx-plane'), say = fx && fx.querySelector('.fx-say');
+  let ctOn = false, ctTimers = [];
+  function ctAct(mode) {
+    if (!ctGo || !plane) return false;
+    if (!lootReady() || state !== 'climb' || jumping || (looting && !ctOn)) return false;
+    ctTimers.forEach(clearTimeout); ctTimers = [];
+    const later = (ms, fn) => ctTimers.push(setTimeout(fn, ms));
+    ctOn = true; looting = true;
+    plane.getAnimations().forEach((an) => an.cancel()); plane.classList.remove('show');
+    const gx = parseFloat(guy.style.left), gy = parseFloat(guy.style.top);
+    const g = docXY(ctGo), bx = g.x + g.w / 2, by = g.y + g.h / 2;
+    const talk = (txt) => { say.textContent = txt; say.style.left = (gx + 70) + 'px'; say.style.top = (gy - 22) + 'px';
+      say.classList.remove('show'); void say.offsetWidth; say.classList.add('show'); };
+    const poke = (txt) => {
+      clickTag.textContent = txt; clickTag.style.left = (bx - 22) + 'px'; clickTag.style.top = (g.y - 26) + 'px';
+      clickTag.classList.remove('show'); void clickTag.offsetWidth; clickTag.classList.add('show');
+      ctGo.classList.remove('ct-poked'); void ctGo.offsetWidth; ctGo.classList.add('ct-poked');
+    };
+    let done = 1500;
+    if (mode === 'email') {
+      pose('plane'); say.classList.remove('show');
+      const sx = gx + 49, sy = gy + 45;
+      plane.style.left = (sx - 24) + 'px'; plane.style.top = (sy - 15) + 'px'; plane.classList.add('show');
+      const dx = bx - sx, dy = by - sy;
+      plane.animate([
+        { transform: 'translate(0,0) rotate(-10deg) scale(.7)' },
+        { transform: 'translate(' + dx * .45 + 'px,' + (Math.min(0, dy) * .45 - 110) + 'px) rotate(8deg) scale(1)', offset: .5 },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) rotate(28deg) scale(.8)' },
+      ], { duration: 950, easing: 'cubic-bezier(.35,.4,.55,1)' }).onfinish = () => { plane.classList.remove('show'); poke('SENT!'); };
+      later(1050, () => talk('Check your inbox! ✉️'));
+      done = 2300;
+    } else if (mode === 'call') {
+      pose('calling'); talk('Ring ring! 📞');
+      later(700, () => poke('CALL!'));
+      later(1500, () => talk('Hello? 👋'));
+      done = 2400;
+    } else {
+      pose('texting'); talk('.');
+      ['..', '...', '.', '..', '...'].forEach((t, i) => later(200 + i * 200, () => { say.textContent = t; }));
+      later(1250, () => { talk('Text me! 💬'); poke('TEXT!'); });
+      done = 2300;
+    }
+    later(done, () => { say.classList.remove('show'); clickTag.textContent = 'CLICK!'; ctOn = false; looting = false; lastMove = performance.now() - 1000; req(); });
+    return true;
+  }
+  if (ctCard && !calm && guy.animate) {
+    ctCard.addEventListener('click', (e) => {
+      const b = e.target.closest('.ct-seg button[data-m]');
+      if (b && e.isTrusted) ctAct(b.dataset.m);
+    });
+    scenes.push({
+      el: ctCard, done: false,
+      when: (r, vh) => r.top < vh * .5 && r.bottom > vh * .55,
+      finish() { this.done = true; },
+      play() {
+        const sel = ctCard.querySelector('.ct-seg button[aria-checked="true"]');
+        looting = false;                           /* ctAct takes the lock itself */
+        if (!ctAct(sel ? sel.dataset.m : 'email')) { looting = false; }
+        this.done = true;
+      },
+    });
+  }
+
+  if (calm || !guy.animate) scenes.forEach((sc) => sc.finish());
+  if ('IntersectionObserver' in window) scenes.forEach((sc) => {
+    new IntersectionObserver((en) => {
+      if (!en[0].isIntersecting || sc.done) return;
+      if (!lootReady()) sc.finish();
+      else {                                     /* safety net if he never gets there */
+        const net = () => { if (sc.done || sc.playing) return; if (looting) { setTimeout(net, 1500); return; } sc.finish(); };
+        setTimeout(net, 6000);
+      }
+    }, { threshold: .35 }).observe(sc.el);
+  });
+  wide.addEventListener && wide.addEventListener('change', () => { if (!lootReady()) scenes.forEach((sc) => { if (!sc.playing && !sc.done) sc.finish(); }); });
+  function sceneTime() {
+    if (looting || state !== 'climb' || !lootReady()) return null;
+    const vh = window.innerHeight;
+    return scenes.find((sc) => !sc.done && !sc.playing && sc.when(sc.el.getBoundingClientRect(), vh)) || null;
+  }
+
+  function update() {
+    raf = 0;
+    if (!wide.matches || jumping) return;
+    const now = performance.now();
+    const wantClimb = window.scrollY + window.innerHeight * 0.45 > top + 40;
+    if (wantClimb && state === 'stand') {
+      state = 'climb';
+      jump(standPos(), climbPos(), 'right', () => {
+        guy.dataset.state = 'climb'; const c = climbPos(); curY = c.y; place(c);
+        pose('land'); landUntil = performance.now() + 450; setTimeout(req, 470);
+      });
+      return;
+    }
+    if (!wantClimb && state === 'climb') {
+      state = 'stand';
+      jump(climbPos(), standPos(), 'left', () => { guy.dataset.state = 'stand'; place(standPos()); });
+      return;
+    }
+    if (state !== 'climb') { guy.dataset.state = 'stand'; place(standPos()); curY = null; return; }
+
+    guy.dataset.state = 'climb';
+    if (looting) return;
+    const p = climbPos();
+    if (curY !== null && Math.abs(p.y - curY) < 24 && lootTime()) { playLoot(); return; }
+    if (curY !== null && Math.abs(p.y - curY) < 24) {
+      const sc = sceneTime();
+      if (sc) { looting = true; sc.playing = true; sc.play(); return; }
+    }
+    guy.style.left = p.x + 'px';
+    if (curY === null) curY = p.y;
+    const before = curY;
+    curY += (p.y - curY) * (calm ? 1 : 0.12);           /* glide after the scroll */
+    if (Math.abs(p.y - curY) < 0.4) curY = p.y;
+    guy.style.top = curY.toFixed(2) + 'px';
+    const moving = Math.abs(curY - before) > 0.15;
+    if (moving) { lastMove = now; bottomSince = 0; toGround(false); }
+
+    if (now < landUntil) { pose('land'); }
+    else if (curY >= bottom - CLIMB_H - 0.5 && !moving) {
+      if (!bottomSince) bottomSince = now;
+      if (now - bottomSince > 650) { toGround(true); } else { pose('bottom'); toGround(false); setTimeout(req, 680); }
+    }
+    else if (moving || now - lastMove < 450) {
+      /* one pose per rung passed, so his hands keep pace with the scroll (reverses when scrolling up) */
+      pose(CYCLE[((Math.floor((curY - top) / STEP) % 4) + 4) % 4]);
+    } else {
+      /* resting: turn and look at the page, now and then reach for the next rung */
+      pose(Math.floor((now - lastMove) / 2200) % 2 ? 'idle2' : 'idle');
+    }
+
+    if (curY !== p.y || now < landUntil) req();
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(req, now - lastMove < 450 ? 470 : 2210);
+  }
+  const req = () => { if (!raf) raf = requestAnimationFrame(update); };
+
+  layout(); update();
+  window.addEventListener('scroll', req, { passive: true });
+  window.addEventListener('resize', () => { layout(); req(); });
+  window.addEventListener('load', () => { layout(); req(); });
+  if ('ResizeObserver' in window) new ResizeObserver(() => { layout(); req(); }).observe(document.body);
+})();

@@ -2627,3 +2627,243 @@ body ul.tech > li:hover {
     0 0 0 1px #a9a9a9, 0 1px 0 #adadad, 0 2px 0 #8f8f8f, 0 5px 7px -3px rgba(0, 0, 0, .4);
 }
 body ul.tech > li:hover svg { transform: none; }
+
+/* ===================== Ladder + pixel climber (right side, About → bottom) ===================== */
+.ladder, .ledge, .climber { position: absolute; z-index: 6; pointer-events: none; display: none; }
+.ladder {
+  width: 55px;
+  background:
+    repeating-linear-gradient(to bottom, #0a0a0a 0 7.5px, transparent 7.5px 16.5px) 11px 0 / 33px 100% no-repeat,
+    linear-gradient(to right, #0a0a0a 0 11px, transparent 11px 44px, #0a0a0a 44px 55px);
+}
+/* stepped pixel ledge he stands on before jumping across */
+.ledge {
+  width: 96px; height: 40px; background: #0a0a0a;
+  clip-path: polygon(0 0, 100% 0, 100% 40%, 82% 40%, 82% 58%, 58% 58%, 58% 74%, 36% 74%, 36% 88%, 14% 88%, 14% 100%, 0 100%);
+}
+.climber { width: 74px; height: 104px; will-change: left, top; }
+.climber img { position: absolute; left: 0; top: 0; display: none; max-width: none; height: auto; }
+.climber .cl-stand { width: 74px; }
+.climber .cl-jump { width: 147px; left: -29px; top: -2px; }
+.climber .cl-climb { width: 67px; transform-origin: 56.6% 50%; }
+.climber[data-state="stand"] .cl-stand,
+.climber[data-state="jump"] .cl-jump,
+.climber[data-state="climb"] .cl-climb { display: block; }
+.climber[data-dir="left"] .cl-jump { transform: scaleX(-1); }
+.climber[data-step="1"] .cl-climb { transform: scaleX(-1) translateY(-3px); }
+.climber[data-state="stand"] .cl-stand { animation: clbob 1.6s steps(2) infinite; }
+@keyframes clbob { 50% { transform: translateY(-2px); } }
+@media (min-width: 1240px) { .ladder, .ledge, .climber { display: block; } }
+@media (prefers-reduced-motion: reduce) { .climber[data-state="stand"] .cl-stand { animation: none; } }
+.ladder.no-room, .ledge.no-room, .climber.no-room { display: none !important; }
+/* climber on the LEFT side: ledge sticks out toward the ladder from the right, he faces left */
+.ledge { clip-path: polygon(0 0, 100% 0, 100% 100%, 86% 100%, 86% 88%, 64% 88%, 64% 74%, 42% 74%, 42% 58%, 18% 58%, 18% 40%, 0 40%); }
+.climber .cl-stand { transform: scaleX(-1); }
+.climber[data-state="stand"] .cl-stand { animation: clbobL 1.6s steps(2) infinite; }
+@keyframes clbobL { 0%, 100% { transform: scaleX(-1); } 50% { transform: scaleX(-1) translateY(-2px); } }
+.climber[data-dir="right"] .cl-jump { transform: none; }
+.climber[data-dir="left"] .cl-jump { transform: scaleX(-1); left: -45px; }
+/* platform comes out from the LEFT screen edge; he faces right and jumps right onto the ladder */
+.ledge { clip-path: polygon(0 0, 100% 0, 100% 40%, calc(100% - 18px) 40%, calc(100% - 18px) 58%, calc(100% - 42px) 58%, calc(100% - 42px) 74%, calc(100% - 64px) 74%, calc(100% - 64px) 88%, calc(100% - 86px) 88%, calc(100% - 86px) 100%, 0 100%); }
+.climber .cl-stand { transform: none; }
+.climber[data-state="stand"] .cl-stand { animation: clbob 1.6s steps(2) infinite; }
+.climber[data-dir="right"] .cl-jump { transform: none; left: -29px; }
+.climber[data-dir="left"] .cl-jump { transform: scaleX(-1); left: -45px; }
+/* smooth climbing: small bob and lean that follow the rung cycle */
+.climber .cl-climb { transform: translateY(var(--bob, 0)) rotate(var(--lean, 0)); }
+.climber[data-step="1"] .cl-climb { transform: scaleX(-1) translateY(var(--bob, 0)) rotate(var(--lean, 0)); }
+
+/* ---- climber poses (from your 6 drawings) ---- */
+.climber { width: 79px; height: 119px; }
+.climber .cl-climb { display: none !important; }
+.climber .cp { width: 79px; display: none; transform: none; }
+.climber .p-bottom { width: 84px; top: 11px; }
+.climber[data-state="climb"][data-pose="a"] .p-a,
+.climber[data-state="climb"][data-pose="am"] .p-a,
+.climber[data-state="climb"][data-pose="b"] .p-b,
+.climber[data-state="climb"][data-pose="idle"] .p-idle,
+.climber[data-state="climb"][data-pose="idle2"] .p-idle2,
+.climber[data-state="climb"][data-pose="land"] .p-land,
+.climber[data-state="climb"][data-pose="bottom"] .p-bottom { display: block; }
+.climber[data-pose="am"] .p-a { transform: scaleX(-1); }
+/* stand / jump sprites keep their own size inside the bigger box */
+.climber .cl-stand { top: 27px; }
+.climber[data-dir] .cl-jump, .climber .cl-jump { top: 25px; }
+
+/* ===================== Ending scene at the foot of the ladder ===================== */
+.end-scene { display: none; }
+@media (min-width: 1240px) { .end-scene { display: block; } }
+.end-scene.no-room { display: none !important; }
+.end-scene > * { position: absolute; z-index: 6; }
+.end-ground { width: 366px; height: auto; pointer-events: none; }
+.end-guy { width: 99px; height: 98px; pointer-events: none; transition: opacity .2s; }
+.end-guy img { position: absolute; left: 0; bottom: 0; display: none; height: auto; }
+.end-guy .eg-stand { width: 83px; }
+.end-guy .eg-cheer { width: 99px; left: -6px; }
+.end-guy[data-pose="stand"] .eg-stand, .end-guy[data-pose="cheer"] .eg-cheer { display: block; }
+.end-guy[data-pose="stand"] .eg-stand { animation: clbob 1.6s steps(2) infinite; }
+.end-guy[data-pose="cheer"] .eg-cheer { animation: cheerhop .5s steps(2) infinite alternate; }
+@keyframes cheerhop { to { transform: translateY(-5px); } }
+.end-kneel { width: 179px; height: auto; display: none; pointer-events: none; }
+.end-scene.kneeling .end-kneel { display: block; }
+.end-scene.kneeling .end-guy, .end-scene.kneeling .end-chest img { visibility: hidden; }
+
+.end-bubble { width: 231px; height: 114px; pointer-events: none; opacity: 0; transform: translateY(8px) scale(.9); transform-origin: 20% 100%; transition: opacity .25s, transform .3s cubic-bezier(.3, 1.5, .5, 1); }
+.end-bubble img { position: absolute; inset: 0; width: 100%; height: auto; }
+.end-bubble span {
+  position: absolute; left: 14px; right: 14px; top: 12px; height: 62px; display: grid; place-items: center; text-align: center;
+  font: 700 .74rem/1.35 "Courier New", Courier, monospace !important; color: #0a0a0a; letter-spacing: .01em;
+}
+.end-scene.at-ground .end-bubble { opacity: 1; transform: none; }
+
+.end-chest { display: block; width: 120px; height: 91px; cursor: pointer; transition: transform .15s; }
+.end-chest img { position: absolute; inset: 0; width: 100%; height: auto; display: none; }
+.end-chest[data-state="closed"] .ch-closed, .end-chest[data-state="half"] .ch-half, .end-chest[data-state="open"] .ch-open { display: block; }
+.end-chest[data-state="closed"] { animation: chestwiggle 2.4s ease-in-out infinite; }
+@keyframes chestwiggle { 0%, 80%, 100% { transform: none; } 85% { transform: rotate(-4deg); } 90% { transform: rotate(4deg); } 95% { transform: rotate(-2deg); } }
+.end-chest:hover { transform: translateY(-3px); }
+.end-chest[data-state="open"] { animation: chestglow 1.4s ease-in-out infinite alternate; }
+@keyframes chestglow { to { filter: drop-shadow(0 0 8px rgba(255, 210, 60, .85)); } }
+.end-chest:focus-visible { outline: 3px solid #2563eb; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) { .end-chest, .end-guy img { animation: none !important; } }
+/* while he is on the ground, the ladder climber is hidden (the ground pose takes over) */
+.climber.off-ladder { visibility: hidden; }
+.end-scene:not(.at-ground) .end-guy { opacity: 0; }
+
+/* new ledge poses (matching the newer drawings): standing "!!", waving now and then, new jump */
+.climber .cl-stand { width: 83px; top: 13px; left: 0; }
+.climber .cl-wave { width: 84px; top: 12px; left: 0; display: none; }
+.climber[data-state="stand"] .cl-stand { animation: clbob 1.6s steps(2) infinite, showA 6s steps(1) infinite; transform: none; }
+.climber[data-state="stand"] .cl-wave { display: block; animation: showB 6s steps(1) infinite; }
+@keyframes showA { 0% { opacity: 1; } 65% { opacity: 0; } }
+@keyframes showB { 0% { opacity: 0; } 65% { opacity: 1; } }
+.climber .cl-jump, .climber[data-dir] .cl-jump { width: 118px; top: 13px; }
+.climber[data-dir="right"] .cl-jump { left: -24px; transform: none; }
+.climber[data-dir="left"] .cl-jump { left: -10px; transform: scaleX(-1); }
+@media (prefers-reduced-motion: reduce) { .climber[data-state="stand"] .cl-wave { display: none; } .climber[data-state="stand"] .cl-stand { animation: none; opacity: 1; } }
+
+/* ===== Skills loot box: he throws a box, it pops open and the tech keycaps fly out ===== */
+.climber .p-hold { width: 86px; left: 27px; top: 6px; }
+.climber .p-throw { width: 75px; left: 22px; top: 13px; }
+.climber[data-state="climb"][data-pose="hold"] .p-hold,
+.climber[data-state="climb"][data-pose="throw"] .p-throw { display: block; }
+.climber[data-pose="hold"] .p-hold { animation: holdbob .3s steps(2) infinite alternate; }
+@keyframes holdbob { to { translate: 0 -2px; } }
+.loot { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 7; pointer-events: none; display: none; }
+.loot.on { display: block; }
+.loot img { position: absolute; display: none; max-width: none; image-rendering: pixelated; }
+.loot img.show { display: block; }
+.loot img { transform-origin: 50% 100%; }
+.loot .lt-fly { transform-origin: 50% 50%; }
+body ul.tech.loot-wait > li:not(.got) { opacity: 0; }
+
+/* ---------- Tech tiles: pixel-art keycaps (stepped corners, hard pixel shading) ---------- */
+body ul.tech > li, body ul.tech > li:hover {
+  --p: 4px;
+  border-radius: 0; background: #0a0a0a; box-shadow: none; transform: none;
+  clip-path: polygon(calc(var(--p)*2) 0, calc(100% - var(--p)*2) 0, calc(100% - var(--p)*2) var(--p), calc(100% - var(--p)) var(--p), calc(100% - var(--p)) calc(var(--p)*2), 100% calc(var(--p)*2),
+    100% calc(100% - var(--p)*2), calc(100% - var(--p)) calc(100% - var(--p)*2), calc(100% - var(--p)) calc(100% - var(--p)), calc(100% - var(--p)*2) calc(100% - var(--p)), calc(100% - var(--p)*2) 100%,
+    calc(var(--p)*2) 100%, calc(var(--p)*2) calc(100% - var(--p)), var(--p) calc(100% - var(--p)), var(--p) calc(100% - var(--p)*2), 0 calc(100% - var(--p)*2),
+    0 calc(var(--p)*2), var(--p) calc(var(--p)*2), var(--p) var(--p), calc(var(--p)*2) var(--p));
+}
+/* key body: light grey sides, darker front lip at the bottom */
+body ul.tech > li::after, body ul.tech > li:hover::after {
+  content: ""; display: block; position: absolute; z-index: 0; inset: 4px; width: auto; height: auto; border: 0; border-radius: 0; transform: none; -webkit-mask: none; mask: none;
+  background: linear-gradient(180deg, #d4d4d4 0 calc(100% - 16px), #0a0a0a calc(100% - 16px) calc(100% - 12px), #a6a6a6 calc(100% - 12px) calc(100% - 4px), #8a8a8a calc(100% - 4px));
+  clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 4px 4px);
+  box-shadow: none;
+}
+/* top face: white with a bright top row and a shaded bottom row */
+body ul.tech > li::before, body ul.tech > li:hover::before {
+  inset: 8px 12px 24px 12px; top: 8px; left: 12px; right: 12px; bottom: 24px; border-radius: 0; z-index: 1;
+  background: linear-gradient(180deg, #ffffff 0 4px, #f3f3f3 4px calc(100% - 4px), #e0e0e0 calc(100% - 4px));
+  clip-path: polygon(4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px), 0 4px, 4px 4px);
+  box-shadow: none; transition: transform .08s steps(1);
+}
+body ul.tech > li svg, body ul.tech > li:hover svg { position: relative; z-index: 2; margin: -16px 0 0 0; width: 26px; height: 26px; transition: transform .08s steps(1); }
+/* press: the top face drops one pixel step into the lip */
+body ul.tech > li:hover::before, body ul.tech > li:hover svg { transform: translateY(4px); }
+
+/* ===== Education scenes: graduation cap toss + certificate pickup ===== */
+.climber .p-capon { width: 82px; left: 46px; top: -5px; }
+.climber .p-cheer { width: 80px; left: 46px; top: 8px; }
+.climber .p-reach { width: 81px; left: 32px; top: 9px; }
+.climber .p-certs { width: 67px; left: 28px; top: 8px; }
+.climber[data-state="climb"][data-pose="capon"] .p-capon,
+.climber[data-state="climb"][data-pose="cheer"] .p-cheer,
+.climber[data-state="climb"][data-pose="reach"] .p-reach,
+.climber[data-state="climb"][data-pose="certs"] .p-certs { display: block; }
+.climber[data-pose="capon"] .p-capon, .climber[data-pose="certs"] .p-certs { animation: holdbob .3s steps(2) infinite alternate; }
+.climber[data-pose="cheer"] .p-cheer { animation: cheerhop .35s steps(2) infinite alternate; }
+
+.edu-fx { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 7; pointer-events: none; }
+.edu-fx img, .edu-fx .fx-cert { position: absolute; display: none; max-width: none; }
+.edu-fx .show { display: block; }
+.fx-bubble {
+  position: absolute; display: none; margin: 0; padding: 6px 10px; white-space: nowrap; background: #fff; color: #0a0a0a;
+  font: 700 13px/1.2 ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace; border: 3px solid #0a0a0a; box-shadow: 4px 4px 0 #0a0a0a;
+}
+.fx-bubble::before { content: ""; position: absolute; left: -9px; bottom: 6px; width: 9px; height: 9px; background: #0a0a0a;
+  clip-path: polygon(0 100%, 100% 0, 100% 100%); }
+.fx-bubble.show { display: block; animation: bubblepop .25s steps(3); }
+@keyframes bubblepop { from { transform: scale(.4); } }
+
+/* the cap that lands on the BS IT file */
+.ft-file.is-current { position: relative; }
+.ft-file.is-current .ft-cap { position: absolute; right: 10px; top: -14px; width: 44px; transform: rotate(10deg); pointer-events: none; z-index: 2; }
+.ft-file.is-current.ping .ft-name::after { animation: tagblink .2s steps(1) 6; }
+@keyframes tagblink { 50% { background: #fff; color: #0a0a0a; outline: 2px solid #0a0a0a; } }
+
+/* pixel progress bar to graduation */
+.ft-file.is-current .ft-name::after { order: 1; }
+.ft-progress { order: 2; display: flex; align-items: center; gap: .6rem; margin-top: .45rem; }
+.fp-bar { display: flex; gap: 2px; padding: 2px; border: 2px solid #0a0a0a; background: #fff; }
+.fp-bar i { width: 9px; height: 10px; background: #d6d6d6; }
+.fp-bar i.on { background: #0a0a0a; }
+.fp-bar i.half { background: repeating-linear-gradient(90deg, #0a0a0a 0 2px, #d6d6d6 2px 4px); }
+.fp-txt { font: 600 .74rem/1 ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace; color: #555; }
+.fp-txt b { color: #0a0a0a; }
+
+/* certificate counter + collected nodes */
+.ab-title .cert-count { display: inline-flex; align-items: center; gap: 6px; margin-left: .6rem; padding: 3px 8px; vertical-align: middle;
+  border: 2px solid #0a0a0a; background: #fff; box-shadow: 3px 3px 0 #0a0a0a;
+  font: 700 .78rem/1 ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace; letter-spacing: 0; text-transform: none; color: #0a0a0a; }
+.cert-count img { width: 22px; height: auto; }
+.cert-count.bump { animation: bubblepop .2s steps(2); }
+.cert-count.done { background: #0a0a0a; color: #fff; }
+.gtl .gtl-node.got { background: #0a0a0a; }
+.gtl .gtl-node.got svg { stroke: #fff; }
+
+/* ===== Projects scene: he clicks through the projects with a remote ===== */
+.climber .p-remote { width: 106px; left: -46px; top: -5px; }
+.climber .p-press { width: 124px; left: -48px; top: -3px; }
+.climber[data-state="climb"][data-pose="remote"] .p-remote,
+.climber[data-state="climb"][data-pose="press"] .p-press { display: block; }
+.climber[data-pose="remote"] .p-remote { animation: holdbob .4s steps(2) infinite alternate; }
+/* the signal: three yellow pixels flying from the remote to the button */
+.edu-fx .fx-zap { position: absolute; display: none; width: 0; height: 0; }
+.edu-fx .fx-zap.show { display: block; }
+.fx-zap i { position: absolute; width: 6px; height: 6px; background: #facc15; box-shadow: 0 0 0 2px #0a0a0a; }
+.fx-zap i:nth-child(1) { left: -3px; top: -3px; }
+.fx-zap i:nth-child(2) { left: -15px; top: 3px; opacity: .7; }
+.fx-zap i:nth-child(3) { left: -27px; top: -5px; opacity: .45; }
+.edu-fx .fx-click { position: absolute; display: none; padding: 3px 6px; background: #facc15; color: #0a0a0a; border: 2px solid #0a0a0a; box-shadow: 3px 3px 0 #0a0a0a;
+  font: 800 11px/1 ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace; letter-spacing: .06em; white-space: nowrap; }
+.edu-fx .fx-click.show { display: block; animation: clickpop .6s steps(4) forwards; }
+@keyframes clickpop { 0% { transform: scale(.3); } 25% { transform: scale(1.15); } 40% { transform: scale(1); } 100% { transform: translateY(-18px); opacity: 0; } }
+.proj-links .proj-next.zapped { transform: translateY(2px); box-shadow: inset 0 0 0 3px #fff, inset 0 -3px 0 #8a8a8a; padding: .9rem 1.2rem .85rem; }
+
+/* ===== Contact scene: email = paper plane, call = phone call, text = typing ===== */
+.climber .p-plane { width: 96px; left: -46px; top: -1px; }
+.climber .p-texting { width: 78px; left: -45px; top: 1px; }
+.climber .p-calling { width: 86px; left: -46px; top: -2px; }
+.climber[data-state="climb"][data-pose="plane"] .p-plane,
+.climber[data-state="climb"][data-pose="texting"] .p-texting,
+.climber[data-state="climb"][data-pose="calling"] .p-calling { display: block; }
+.climber[data-pose="calling"] .p-calling { animation: ringshake .12s steps(2) infinite alternate; }
+@keyframes ringshake { from { translate: -1px 0; } to { translate: 1px 0; } }
+.climber[data-pose="texting"] .p-texting { animation: holdbob .25s steps(2) infinite alternate; }
+.edu-fx .fx-plane { width: 48px; }
+.fx-bubble.fx-say { min-width: 2.2em; text-align: center; }
+.ct-go.ct-poked { animation: ctpoke .45s steps(3); }
+@keyframes ctpoke { 0% { transform: translateY(3px); } 50% { transform: translateY(-4px); } 100% { transform: none; } }
